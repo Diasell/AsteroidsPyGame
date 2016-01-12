@@ -32,16 +32,18 @@ game_exit = False
 game_over = False
 paused = False
 MY_EVENT = pygame.USEREVENT
-VOLUME_LEVEL = [0.1, 0.5, 0.9]
+VOLUME_LEVEL = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+DEFAULT_SOUND_LEVEL = 4
+current_sound = DEFAULT_SOUND_LEVEL
 
-"""Initializing PyGame and gamescreen"""
+# Initializing PyGame and gamescreen
 pygame.init()
 pygame.mixer.init()
 game_display = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Asteroids")
 clock = pygame.time.Clock()
 
-"""importing images"""
+# importing images
 intro_image     = pygame.image.load('intro.jpg')
 debris_image    = pygame.image.load("debris2_blue.png")
 nebula_image    = pygame.image.load("nebula_blue.f2014.png")
@@ -56,19 +58,19 @@ pbutton_image   = pygame.image.load("button_pressed1.png")
 gameover_image  = pygame.image.load("gameover.jpg")
 settings_image  = pygame.image.load("settings1.jpg")
 
-""" importing Sounds"""
+# importing Sounds
 soundtrack        = pygame.mixer.Sound("soundtrack.ogg")
 missile_sound     = pygame.mixer.Sound("missile.ogg")
 ship_thrust_sound = pygame.mixer.Sound("thrust.ogg")
 explosion_sound   = pygame.mixer.Sound("explosion.ogg")
 
-""" Setting up the sound volume level"""
-explosion_sound.set_volume(VOLUME_LEVEL[1])
-missile_sound.set_volume(VOLUME_LEVEL[1])
-soundtrack.set_volume(VOLUME_LEVEL[1])
+# Setting up the sound volume level"""
+# explosion_sound.set_volume(VOLUME_LEVEL[sound_index])
+# missile_sound.set_volume(VOLUME_LEVEL[sound_index])
+# soundtrack.set_volume(VOLUME_LEVEL[sound_index])
 
 
-""" Setting up fonts"""
+# Setting up fonts
 smallfont  = pygame.font.SysFont("comicsansms", 25)
 mediumfont = pygame.font.SysFont("comicsansms", 50)
 bigfont    = pygame.font.SysFont("comicsansms", 80)
@@ -83,6 +85,22 @@ def angle_to_vector(ang):
     """
     return [math.cos(math.radians(ang)), -math.sin(math.radians(ang))]
 
+def set_sound_level(level):
+    explosion_sound.set_volume(VOLUME_LEVEL[level])
+    missile_sound.set_volume(VOLUME_LEVEL[level])
+    soundtrack.set_volume(VOLUME_LEVEL[level])
+
+
+
+def change_sound_level():
+    global current_sound
+    if current_sound < 9:
+        current_sound += 1
+    if current_sound == 9:
+        current_sound = 0
+    set_sound_level(current_sound)
+    print current_sound
+    missile_sound.play()
 
 def dist(p,q):
     return math.sqrt((p[0] - q[0]) ** 2+(p[1] - q[1]) ** 2)
@@ -159,10 +177,10 @@ def text_objects(text, color, size):
     return textSurface, textSurface.get_rect()
 
 
-def message_to_screen(msg, color, y_displace=0, size = 'small'):
+def message_to_screen(msg, color, y_displace=0, x_displace=0, size = 'small'):
 
     textSurf, textRect = text_objects(msg, color, size)
-    textRect.center = (WIDTH/2), (HEIGHT/2) + y_displace
+    textRect.center = (WIDTH/2)+ x_displace, (HEIGHT/2) + y_displace
     game_display.blit(textSurf, textRect)
 
 def text_to_button(msg, color, buttonx, buttony, buttonwidth, buttonheight, size = "small" ):
@@ -188,6 +206,9 @@ def button(text, x, y, width, height, in_active_img, active_img, text_color, act
                 paused = False
             if action == "menu":
                 game_intro()
+            if action == "change_sound_level":
+                change_sound_level()
+                print "called fuction"
 
     else:
         game_display.blit(button_image, (x, y))
@@ -371,9 +392,20 @@ def game_settings():
                     quit()
 
         game_display.blit(settings_image, (0,0))
-        button("Menu", 300, 500, 200, 48, button_image, pbutton_image, white, "menu")
+        message_to_screen("Controls:", white, -250, -290, "medium")
+        message_to_screen("Accelerate:                         Up Arrow", white, -200, -140)
+        message_to_screen("Rotate clockwise:               Right Arrow", white, -160,-125)
+        message_to_screen("Rotate counter-clockwise: Left Arrow", white, -120,-130)
+        message_to_screen("Shoot: SPACEBAR", white, -80, -250)
+        message_to_screen("Pause: P", white, -40, -310)
+        message_to_screen("Exit to Menu: ESC", white, 0, -250)
+
+        message_to_screen("Sound:", white, 75, -310, "medium")
+        button(" Change ", 200, 355, 200, 48, button_image, pbutton_image, white, "change_sound_level")
+
+        button("Back", 550, 500, 200, 48, button_image, pbutton_image, white, "menu")
         pygame.display.update()
-        clock.tick(FPS)
+        clock.tick(FPS/6)
 
 def pause():
     global paused
@@ -510,5 +542,6 @@ def game_loop():
     pygame.quit
     quit()
 
+set_sound_level(DEFAULT_SOUND_LEVEL)
 game_intro()
 
