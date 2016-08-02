@@ -73,13 +73,13 @@ smallfont  = pygame.font.SysFont("comicsansms", 25)
 mediumfont = pygame.font.SysFont("comicsansms", 50)
 bigfont    = pygame.font.SysFont("comicsansms", 80)
 
+
 # helper functions to handle transformations
 def angle_to_vector(ang):
     """
-    Ð²Ñ–Ñ�ÑŒ y Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð° Ð²Ð½Ð¸Ð·, Ð° Ð²Ñ–Ñ�ÑŒ Ñ…  Ð²Ð¿Ñ€Ð°Ð²Ð¾
-    ÐºÑƒÑ‚ Ð½Ð° Ð²Ñ…Ñ–Ð´ Ð¿Ð¾Ð´Ð°Ñ”Ñ‚ÑŒÑ�Ñ� Ð² Ð³Ñ€Ð°Ð´ÑƒÑ�Ð°Ñ… Ñ�Ðº Ð´Ð»Ñ� Ð½Ð¾Ñ€Ð¼Ð°Ð»ÑŒÐ½Ð¾Ñ— Ð´ÐµÐºÐ°Ñ€Ñ‚Ð¾Ð²Ð¾Ñ— Ñ�Ð¸Ñ�Ñ‚ÐµÐ¼Ð¸:
-    Ñ‚Ð¾Ð±Ñ‚Ð¾ Ð²Ñ–Ñ�ÑŒ Ñƒ Ð½Ð°Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð° Ð²Ð³Ð¾Ñ€Ñƒ, Ð° Ð²Ñ–Ñ�ÑŒ Ñ… - Ð²Ð¿Ñ€Ð°Ð²Ð¾
-    ÐºÐ¾Ñ�Ð¸Ð½ÑƒÑ� Ñ– Ñ�Ð¸Ð½ÑƒÑ� Ð¿Ñ€Ð¸Ð¹Ð¼Ð°ÑŽÑ‚ÑŒ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð½Ñ� Ð² Ñ€Ð°Ð´Ñ–Ð°Ð½Ð°Ñ…, Ñ‚Ð¾Ð¼Ñƒ Ð¹Ð´Ðµ ÐºÐ¾Ð½Ð²ÐµÑ€Ñ‚Ð°Ñ†Ñ–Ñ�
+    :param ang its an angle in degrees in the regular right-oriented Descartes
+    But in pyGame coordinates are left oriented plus cos and sin take arguments
+    in radians that is why this convertation is needed
     """
     return [math.cos(math.radians(ang)), -math.sin(math.radians(ang))]
 
@@ -90,6 +90,7 @@ def dist(p,q):
 
 def rot_center(image, angle):
     """rotate an image while keeping its center and size"""
+
     orig_rect = image.get_rect()
     rot_image = pygame.transform.rotate(image, angle)
     rot_rect = orig_rect.copy()
@@ -101,32 +102,44 @@ def rot_center(image, angle):
 def rock_spawner():
     global asteroid
     if not game_over:
-        rock_pos = [random.randrange(0,WIDTH-90),random.randrange(0,HEIGHT-90)]
-        rock_vel = [random.randrange(-4,4),random.randrange(-4,4)]
+        rock_pos = [random.randrange(0, WIDTH - 90),
+                    random.randrange(0, HEIGHT - 90)]
+        rock_vel = [random.randrange(-4, 4),
+                    random.randrange(-4, 4)]
         rock_angle = 1
         rock_angle_vel = random.randrange(-10, 10)
         if score > 1000:
             rock_vel[0] += score // 1000
             rock_vel[1] += score // 1000
-        asteroid = Sprites(rock_pos, rock_vel, rock_angle, rock_angle_vel, asteroid_image, 90)
+        asteroid = Sprites(rock_pos,
+                           rock_vel,
+                           rock_angle,
+                           rock_angle_vel,
+                           asteroid_image,
+                           90)
                     
-        if len(ASTEROIDS_GROUP) < 20 and abs(asteroid.pos[0] - ship.pos[0])> 150 and abs(asteroid.pos[1] - ship.pos[1])>150:
+        if len(ASTEROIDS_GROUP) < 20 and\
+                        abs(asteroid.pos[0] - ship.pos[0]) > 150 and\
+                        abs(asteroid.pos[1] - ship.pos[1]) > 150:
             ASTEROIDS_GROUP.add(asteroid)
         else:
             pass
 
 
 def group_collide(group, other_object):
+
     s = set(group)
     collide = False
     for item in s:
         if item.collide(other_object):
-            expl = Sprites(other_object.pos ,[0,0], 0, 0, explosion_image, 128, True)
+            expl = Sprites(other_object.pos,
+                           [0, 0], 0, 0, explosion_image, 128, True)
             EXPLOSIONS_GROUP.add(expl)
             explosion_sound.play()
             group.remove(item)         
             collide = True
     return collide
+
 
 def group_to_group_collide(group1, group2):
     global count_collision
@@ -142,7 +155,8 @@ def group_to_group_collide(group1, group2):
 
 def game_lives(lives):
     text = smallfont.render("Lives: " + str(lives), True, white)
-    game_display.blit(text, [WIDTH-125 ,0])
+    game_display.blit(text, [WIDTH - 125 ,0])
+
 
 def game_score(score):
     text = smallfont.render("Score: " + str(score), True, white)
